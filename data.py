@@ -13,12 +13,12 @@ class Data:
 
     buttons = [
         generate_single_button,
-        [InlineKeyboardButton("لمعلمة عمل البوت او صيانته", url="https://t.me/Privapact")],
+        [InlineKeyboardButton("قناة البوت", url="https://t.me/Privapact")],
         [
             InlineKeyboardButton("كيفية عمل البوت", callback_data="help"),
             InlineKeyboardButton("عن البوت", callback_data="about")
         ],
-        [InlineKeyboardButton("يوتات اخرى رائعة", url="https://t.me/PrivaPact")],
+        [InlineKeyboardButton("بوتات اخرى رائعة", url="https://t.me/PrivaPact")],
     ]
 
     START = """
